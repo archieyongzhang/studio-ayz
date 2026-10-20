@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的工作台 · Mac 本地版下载</title>
+<style>
+  :root { --primary:#4f46e5; --bg:#f6f7fb; --card:#fff; --text:#1f2937; --text2:#6b7280; --border:#e5e7eb; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; background:var(--bg); color:var(--text);
+         min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px 20px; }
+  .wrap { width:100%; max-width:780px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:32px;
+          box-shadow:0 4px 24px rgba(0,0,0,.06); }
+  .head { display:flex; align-items:center; gap:16px; margin-bottom:8px; }
+  .icon { width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#4f46e5,#8b5cf6);
+          display:flex; align-items:center; justify-content:center; font-size:28px; color:#fff; flex-shrink:0; }
+  h1 { font-size:22px; }
+  .sub { color:var(--text2); font-size:14px; margin-top:4px; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:10px; margin:20px 0 6px;
+         background:var(--primary); color:#fff; border:none; width:100%; height:52px; border-radius:12px;
+         font-size:16px; font-weight:600; cursor:pointer; }
+  .btn:hover { background:#4338ca; }
+  .btn-ghost { background:#fff; color:var(--primary); border:1px solid var(--primary); }
+  .hint { text-align:center; color:var(--text2); font-size:13px; margin-bottom:18px; }
+  h2 { font-size:15px; margin:22px 0 10px; }
+  ol { padding-left:20px; }
+  li { color:#374151; font-size:14px; line-height:1.95; }
+  code { background:#f3f4f6; padding:2px 6px; border-radius:5px; font-size:13px; }
+  .parts { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:10px 0; }
+  .part { display:flex; justify-content:space-between; align-items:center; gap:8px;
+          background:var(--bg); border-radius:9px; padding:9px 12px; font-size:13px; }
+  .part a { color:var(--primary); text-decoration:none; font-weight:600; }
+  .part span { color:var(--text2); font-size:12px; }
+  .note { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px 14px;
+          font-size:13px; line-height:1.8; color:#92400e; margin-top:14px; }
+  .ok { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; border-radius:10px; padding:12px 14px;
+        font-size:13px; line-height:1.8; margin-top:14px; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px; }
+  .item { background:var(--bg); border-radius:10px; padding:10px 12px; font-size:13px; color:#374151; }
+  .item b { display:block; font-size:12px; color:var(--text2); font-weight:500; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="icon">台</div>
+      <div>
+        <h1>我的工作台 · Mac 本地版</h1>
+        <div class="sub">数据全在你自己 Mac 上 · 界面功能与网页版一致 · 免装 Node</div>
+      </div>
+    </div>
+
+    <button class="btn" id="dl-all">⬇️　一键下载全部（6 个分块 + 合并脚本）</button>
+    <button class="btn btn-ghost" id="open-downloads">下载完点这里 → 打开下载文件夹</button>
+    <div class="hint">总大小约 45 MB（分 6 块，每块 8 MB；分块下载更稳定）</div>
+
+    <h2>三个步骤</h2>
+    <ol>
+      <li><b>下载</b>：点上面按钮，6 个分块和合并脚本会依次下载（浏览器可能询问保存位置，选「下载」文件夹即可）</li>
+      <li><b>合并</b>：双层解压 <code>join-workbench.zip</code>，得到 <code>join-workbench.command</code> 后双击它
+        （若提示"身份不明的开发者"→ 右键点它 → 打开）。它会自动合并 6 个分块并校验完整性</li>
+      <li><b>安装</b>：双击解压出来的 <code>安装我的工作台.command</code>，选一个文件夹存数据，
+        桌面出现「我的工作台」图标即完成</li>
+    </ol>
+
+    <h2>分块清单（也可单独点选下载）</h2>
+    <div class="parts" id="parts">
+      <div class="part"><a href="./part-00" download>part-00</a><span>8 MB</span></div>
+      <div class="part"><a href="./part-01" download>part-01</a><span>8 MB</span></div>
+      <div class="part"><a href="./part-02" download>part-02</a><span>8 MB</span></div>
+      <div class="part"><a href="./part-03" download>part-03</a><span>8 MB</span></div>
+      <div class="part"><a href="./part-04" download>part-04</a><span>8 MB</span></div>
+      <div class="part"><a href="./part-05" download>part-05</a><span>4.7 MB</span></div>
+      <div class="part" style="grid-column:1 / -1"><a href="./join-workbench.zip" download>join-workbench.zip</a><span>合并脚本（解压后双击运行，2 KB）</span></div>
+    </div>
+
+    <h2>日常使用</h2>
+    <div class="grid">
+      <div class="item"><b>怎么打开</b>双击桌面「我的工作台」图标</div>
+      <div class="item"><b>要手动启动吗</b>不用，开机后自动在后台运行</div>
+      <div class="item"><b>数据在哪</b>你选的那个文件夹里的 workbench.db</div>
+      <div class="item"><b>怎么备份</b>拷走这个 .db 文件即可</div>
+      <div class="item"><b>升级会丢数据吗</b>不会，覆盖安装即可，数据保留</div>
+      <div class="item"><b>怎么卸载</b>双击「卸载我的工作台.command」</div>
+    </div>
+
+    <div class="ok">
+      ✅ 这个下载页放在正式站点上，不会像临时沙箱那样失效。分块合并后会自动校验 SHA256，
+      确保文件完整可用。
+    </div>
+    <div class="note">
+      合并脚本会核对校验值；如果提示"校验失败"，通常是某个分块没下载完整 ——
+      删掉全部分块重新下载一遍即可。
+    </div>
+  </div>
+</div>
+
+<script>
+  const files = ["part-00","part-01","part-02","part-03","part-04","part-05","join-workbench.zip"];
+  document.getElementById("dl-all").addEventListener("click", async () => {
+    for (const f of files) {
+      const a = document.createElement("a");
+      a.href = "./" + f;
+      a.download = f;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      await new Promise(r => setTimeout(r, 1200));
+    }
+  });
+  document.getElementById("open-downloads").addEventListener("click", () => {
+    const isMac = navigator.platform.toLowerCase().includes("mac");
+    alert(isMac
+      ? "请打开访达 → 左侧「下载」，先把 join-workbench.zip 解压，再双击里面的 join-workbench.command。"
+      : "请打开你的下载文件夹，找到 join-workbench.command 运行（需要在 Mac 上使用）。");
+  });
+</script>
+</body>
+</html>

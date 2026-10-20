@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的工作台 · Demo</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+    --primary-light2: #e0e7ff;
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --text2: #6b7280;
+    --border: #e5e7eb;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: "PingFang SC","Microsoft YaHei",-apple-system,sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+
+  /* ============ 顶部功能栏 ============ */
+  .topbar {
+    height:56px; background:var(--card); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:16px; padding:0 20px;
+    position:sticky; top:0; z-index:50;
+  }
+  .logo { display:flex; align-items:center; gap:8px; font-weight:700; font-size:16px; }
+  .logo .mark { width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,var(--primary),#8b5cf6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; }
+  .search { flex:1; max-width:420px; position:relative; }
+  .search input { width:100%; height:34px; border:1px solid var(--border); border-radius:8px; padding:0 12px 0 32px; background:var(--bg); font-size:13px; outline:none; }
+  .search input:focus { border-color:var(--primary); background:#fff; }
+  .search .icon { position:absolute; left:10px; top:9px; color:var(--text2); }
+  .top-actions { margin-left:auto; display:flex; align-items:center; gap:12px; }
+  .btn-primary {
+    background:var(--primary); color:#fff; border:none; height:34px; padding:0 14px;
+    border-radius:8px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+  .btn-primary:hover { background:#4338ca; }
+  .today-chip { color:var(--text2); font-size:13px; background:var(--bg); padding:6px 12px; border-radius:8px; }
+  .avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; }
+
+  /* ============ 布局 ============ */
+  .layout { display:flex; min-height:calc(100vh - 56px); }
+
+  /* ============ 左侧模块导航 ============ */
+  .sidebar {
+    width:200px; background:#111827; color:#9ca3af; padding:16px 10px;
+    display:flex; flex-direction:column; gap:4px; flex-shrink:0;
+  }
+  .side-label { font-size:11px; color:#6b7280; padding:8px 12px 4px; letter-spacing:1px; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px;
+    cursor:pointer; font-size:14px; transition:.15s;
+  }
+  .nav-item:hover { background:#1f2937; color:#e5e7eb; }
+  .nav-item.active { background:var(--primary); color:#fff; font-weight:500; }
+  .nav-item .badge { margin-left:auto; background:rgba(255,255,255,.15); border-radius:10px; font-size:11px; padding:1px 7px; }
+  .nav-item.active .badge { background:rgba(255,255,255,.25); }
+  .sidebar .foot { margin-top:auto; font-size:11px; color:#4b5563; padding:12px; border-top:1px solid #1f2937; }
+
+  /* ============ 主区域 ============ */
+  .main { flex:1; padding:20px 24px; overflow:auto; }
+  .page-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .page-head h1 { font-size:18px; }
+  .page-head .sub { color:var(--text2); font-size:13px; margin-top:4px; }
+  .btn-ghost { background:#fff; border:1px solid var(--border); height:32px; padding:0 12px; border-radius:8px; font-size:13px; cursor:pointer; color:var(--text); }
+  .btn-ghost:hover { border-color:var(--primary); color:var(--primary); }
+
+  .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); }
+  .card-h { padding:14px 16px; border-bottom:1px solid var(--border); font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .card-h .more { margin-left:auto; color:var(--text2); font-weight:400; font-size:12px; cursor:pointer; }
+  .card-b { padding:14px 16px; }
+
+  .grid { display:grid; gap:16px; }
+  .grid-3 { grid-template-columns:repeat(3,1fr); }
+  .grid-2 { grid-template-columns:2fr 1fr; }
+
+  .section-title { font-size:14px; font-weight:600; margin:20px 0 10px; }
+
+  /* 统计卡 */
+  .stat { padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .stat .ic { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .stat .num { font-size:20px; font-weight:700; }
+  .stat .lbl { color:var(--text2); font-size:12px; }
+
+  /* 待办 */
+  .todo-item { display:flex; align-items:flex-start; gap:10px; padding:10px 16px; border-bottom:1px solid var(--border); }
+  .todo-item:last-child { border-bottom:none; }
+  .chk { width:18px; height:18px; border-radius:50%; border:2px solid #cbd5e1; flex-shrink:0; margin-top:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; }
+  .chk.done { background:var(--green); border-color:var(--green); }
+  .todo-title { font-size:14px; }
+  .todo-title.done { text-decoration:line-through; color:var(--text2); }
+  .todo-meta { margin-left:auto; display:flex; gap:6px; align-items:center; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:10px; }
+  .tag.high { background:#fee2e2; color:#dc2626; }
+  .tag.mid { background:#fef3c7; color:#d97706; }
+  .tag.low { background:#dcfce7; color:#16a34a; }
+  .tag.proj { background:var(--primary-light); color:var(--primary); }
+  .due { font-size:12px; color:var(--text2); }
+  .due.overdue { color:var(--red); }
+  .input-add { display:flex; gap:8px; padding:12px 16px; border-bottom:1px solid var(--border); }
+  .input-add input { flex:1; height:32px; border:1px solid var(--border); border-radius:8px; padding:0 10px; font-size:13px; outline:none; }
+  .input-add input:focus { border-color:var(--primary); }
+
+  /* 想法 */
+  .idea-card { padding:12px 16px; border-bottom:1px solid var(--border); }
+  .idea-card:last-child { border-bottom:none; }
+  .idea-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .idea-top b { font-size:14px; }
+  .idea-text { color:var(--text2); font-size:13px; line-height:1.6; }
+  .idea-foot { display:flex; gap:6px; margin-top:8px; align-items:center; }
+  .tag.type-idea { background:#fef3c7; color:#b45309; }
+  .tag.type-req { background:#ede9fe; color:#7c3aed; }
+  .tag.taggray { background:#f3f4f6; color:var(--text2); }
+  .idea-foot .time { margin-left:auto; color:#9ca3af; font-size:12px; }
+
+  /* 项目 */
+  .proj-card { padding:14px 16px; }
+  .proj-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .proj-dot { width:10px; height:10px; border-radius:3px; }
+  .proj-top b { font-size:14px; }
+  .proj-top .pct { margin-left:auto; font-weight:700; color:var(--primary); font-size:15px; }
+  .bar { height:8px; background:var(--bg); border-radius:6px; overflow:hidden; }
+  .bar i { display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,var(--primary),#8b5cf6); }
+  .proj-sub { display:flex; justify-content:space-between; color:var(--text2); font-size:12px; margin-top:8px; }
+  .proj-sub b { color:var(--text); font-weight:500; }
+
+  /* 时间线 */
+  .timeline { position:relative; padding-left:18px; }
+  .timeline::before { content:""; position:absolute; left:5px; top:4px; bottom:4px; width:2px; background:var(--border); }
+  .tl-item { position:relative; padding:0 0 14px 12px; }
+  .tl-item:last-child { padding-bottom:0; }
+  .tl-item::before { content:""; position:absolute; left:-17px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--primary); border:2px solid #fff; box-shadow:0 0 0 2px var(--primary-light2); }
+  .tl-item .t { font-size:13px; font-weight:500; }
+  .tl-item .d { color:var(--text2); font-size:12px; margin-top:3px; line-height:1.5; }
+  .tl-item .time { color:#9ca3af; font-size:11px; margin-top:2px; }
+
+  /* 资料列表 */
+  .res-item { display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; }
+  .res-item:last-child { border-bottom:none; }
+  .res-ic { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .res-item .name { flex:1; }
+  .res-item .kind { color:#9ca3af; font-size:11px; }
+
+  /* 英语学习 */
+  .eng-row { display:flex; gap:16px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); }
+  .eng-row:last-child { border-bottom:none; }
+  .eng-row .r { flex:1; }
+  .eng-row .rn { font-size:13px; font-weight:500; }
+  .eng-row .rd { color:var(--text2); font-size:12px; margin-top:2px; }
+  .heatmap { display:grid; grid-template-columns:repeat(12,12px); gap:4px; }
+  .heatmap i { width:12px; height:12px; border-radius:3px; background:var(--border); }
+  .heatmap i.h1 { background:#c7d2fe; } .heatmap i.h2 { background:#818cf8; } .heatmap i.h3 { background:var(--primary); }
+
+  /* 知识库 */
+  .kb-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .kb-card { padding:14px 16px; }
+  .kb-card .kc-top { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+  .kb-card .kc-ic { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .kb-card b { font-size:14px; }
+  .kb-card p { color:var(--text2); font-size:12px; line-height:1.6; }
+  .kb-card .kc-foot { display:flex; gap:6px; margin-top:10px; }
+
+  /* 复盘沉淀 */
+  .review-item { padding:10px 16px; border-bottom:1px solid var(--border); font-size:13px; line-height:1.7; }
+  .review-item:last-child { border-bottom:none; }
+  .review-item .rh { display:flex; gap:8px; align-items:center; font-weight:600; margin-bottom:2px; }
+  .review-item .rh .tag { font-weight:400; }
+  .review-item p { color:var(--text2); }
+
+  .dashboard-wrap { display:flex; flex-direction:column; gap:16px; }
+  .demo-note {
+    position:fixed; right:16px; bottom:16px; background:#111827; color:#d1d5db;
+    padding:10px 14px; border-radius:10px; font-size:12px; line-height:1.7; box-shadow:0 4px 16px rgba(0,0,0,.25); z-index:99;
+  }
+  .demo-note b { color:#fff; }
+  /* 英语学习 · 学习项 */
+  .eng-stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .eng-stat { background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:8px; box-shadow:var(--shadow); }
+  .eng-stat b { font-size:16px; }
+  .eng-stat span { color:var(--text2); font-size:12px; }
+  .learn-layout { display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start; }
+  .li-card { padding:12px 14px; border-bottom:1px solid var(--border); cursor:pointer; transition:.15s; }
+  .li-card:last-child { border-bottom:none; }
+  .li-card:hover { background:var(--bg); }
+  .li-card.sel { background:var(--primary-light); box-shadow:inset 3px 0 0 var(--primary); }
+  .li-top { display:flex; align-items:center; gap:8px; }
+  .li-ic { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .li-top b { font-size:13px; flex:1; }
+  .li-sub { display:flex; justify-content:space-between; color:var(--text2); font-size:11px; margin-top:8px; }
+  .li-bar { height:6px; background:#eef0f5; border-radius:5px; overflow:hidden; margin-top:6px; }
+  .li-bar i { display:block; height:100%; background:linear-gradient(90deg,var(--primary),#8b5cf6); border-radius:5px; }
+  .itype { font-size:11px; padding:2px 8px; border-radius:10px; }
+  .itype.book { background:#ede9fe; color:#7c3aed; }
+  .itype.site { background:#dbeafe; color:#2563eb; }
+  .itype.proj { background:#fef3c7; color:#d97706; }
+  .act-item { display:flex; align-items:center; gap:12px; padding:11px 16px; border-bottom:1px solid var(--border); }
+  .act-item:last-child { border-bottom:none; }
+  .act-main { flex:1; }
+  .act-name { font-size:13px; font-weight:500; display:flex; align-items:center; gap:8px; }
+  .act-desc { color:var(--text2); font-size:12px; margin-top:2px; }
+  .act-meta { display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .mini-bar { width:120px; height:6px; background:#eef0f5; border-radius:5px; overflow:hidden; }
+  .mini-bar i { display:block; height:100%; background:var(--primary); border-radius:5px; }
+  .freq { font-size:11px; padding:2px 7px; border-radius:8px; }
+  .freq.daily { background:#dcfce7; color:#16a34a; }
+  .freq.weekly { background:#dbeafe; color:#2563eb; }
+  .freq.each { background:#fef3c7; color:#d97706; }
+  .freq.chapter { background:#ede9fe; color:#7c3aed; }
+  .act-done { color:var(--green); font-size:12px; font-weight:600; }
+  .btn-mini { background:var(--primary-light); color:var(--primary); border:none; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; font-weight:500; }
+  .btn-mini:hover { background:var(--primary-light2); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<!-- ============ 顶部：主要功能 ============ -->
+<div class="topbar">
+  <div class="logo"><span class="mark">台</span>我的工作台</div>
+  <div class="search">
+    <span class="icon">🔍</span>
+    <input placeholder="全局搜索：任务、想法、项目、资料…（Ctrl+K）">
+  </div>
+  <div class="top-actions">
+    <span class="today-chip">📅 3月14日 · 今日待办 3/8</span>
+    <button class="btn-primary">＋ 快速新建 ▾</button>
+    <div class="avatar">我</div>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- ============ 左侧：工作模块 ============ -->
+  <div class="sidebar">
+    <div class="side-label">工作模块</div>
+    <div class="nav-item" data-page="dashboard">🏠 总览仪表盘</div>
+    <div class="nav-item" data-page="todo">✅ 待办事项 <span class="badge">5</span></div>
+    <div class="nav-item" data-page="ideas">💡 想法与需求 <span class="badge">12</span></div>
+    <div class="nav-item active" data-page="projects">📁 项目进展 <span class="badge">4</span></div>
+    <div class="nav-item" data-page="english">🗣️ 英语学习</div>
+    <div class="nav-item" data-page="kb">📚 知识库</div>
+    <div class="foot">个人应用 · Demo 预览版<br>点击左侧模块可切换页面</div>
+  </div>
+
+  <!-- ============ 主区域 ============ -->
+  <div class="main">
+
+    <!-- ===== 仪表盘 ===== -->
+    <div class="page hidden" id="page-dashboard">
+      <div class="page-head">
+        <div><h1>总览仪表盘</h1><div class="sub">今天做了什么、该做什么、各项目进展汇总</div></div>
+        <button class="btn-ghost">📝 今日复盘</button>
+      </div>
+      <div class="dashboard-wrap">
+        <div class="grid grid-3">
+          <div class="card stat"><div class="ic" style="background:#dcfce7">✅</div><div><div class="num">3 / 8</div><div class="lbl">今日待办完成</div></div></div>
+          <div class="card stat"><div class="ic" style="background:#e0e7ff">📁</div><div><div class="num">4</div><div class="lbl">进行中项目</div></div></div>
+          <div class="card stat"><div class="ic" style="background:#fef3c7">💡</div><div><div class="num">12</div><div class="lbl">想法与需求池</div></div></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-h">📌 今日待办 <span class="more">查看全部 →</span></div>
+            <div class="todo-item"><div class="chk done">✓</div><div class="todo-title done">复盘昨天项目进展会</div><div class="todo-meta"><span class="tag low">已完成</span></div></div>
+            <div class="todo-item"><div class="chk"></div><div class="todo-title">完成英语 Unit 5 听力练习</div><div class="todo-meta"><span class="due today">今天</span><span class="tag mid">中</span></div></div>
+            <div class="todo-item"><div class="chk"></div><div class="todo-title">整理 AI 工作台需求文档</div><div class="todo-meta"><span class="due">明天</span><span class="tag high">高</span><span class="tag proj">个人工作台</span></div></div>
+          </div>
+          <div class="card">
+            <div class="card-h">📁 项目进度汇总 <span class="more">→</span></div>
+            <div class="card-b" style="display:flex;flex-direction:column;gap:12px">
+              <div><div class="proj-top"><span class="proj-dot" style="background:var(--primary)"></span><b>个人工作台</b><span class="pct">35%</span></div><div class="bar"><i style="width:35%"></i></div></div>
+              <div><div class="proj-top"><span class="proj-dot" style="background:var(--green)"></span><b>英语学习计划</b><span class="pct">60%</span></div><div class="bar"><i style="width:60%;background:linear-gradient(90deg,#10b981,#34d399)"></i></div></div>
+              <div><div class="proj-top"><span class="proj-dot" style="background:var(--amber)"></span><b>博客改版</b><span class="pct">15%</span></div><div class="bar"><i style="width:15%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></i></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-h">🧾 近期沉淀（做过的事）</div>
+            <div class="review-item"><div class="rh">03-13 <span class="tag proj">个人工作台</span></div><p>完成左侧导航与顶部栏设计，确认了五大模块划分：待办 / 想法 / 项目 / 英语 / 知识库。</p></div>
+            <div class="review-item"><div class="rh">03-12 <span class="tag taggray" style="background:#dcfce7;color:#16a34a">英语学习</span></div><p>完成 Unit 4，听力正确率 75%，生词 12 个已加入复习队列。</p></div>
+          </div>
+          <div class="card">
+            <div class="card-h">🎯 计划中（没做的事）</div>
+            <div class="review-item"><div class="rh">计划 <span class="tag taggray">本周</span></div><p>把想法池里「语音输入待办」这条需求转成待办，排进工作台项目。</p></div>
+            <div class="review-item"><div class="rh">计划 <span class="tag taggray">下周</span></div><p>知识库首批导入：10 个常用网站 + 3 本书单。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 待办事项 ===== -->
+    <div class="page hidden" id="page-todo">
+      <div class="page-head">
+        <div><h1>待办事项</h1><div class="sub">该做的事情 · 按优先级与截止时间安排</div></div>
+        <div><button class="btn-ghost">按项目筛选 ▾</button></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-h">🕐 进行中（5）</div>
+          <div class="input-add"><input placeholder="＋ 添加待办，回车确认（可选：@项目 #优先级）"><button class="btn-primary">添加</button></div>
+          <div class="todo-item"><div class="chk"></div><div class="todo-title">完成英语 Unit 5 听力练习</div><div class="todo-meta"><span class="due today">今天</span><span class="tag mid">中</span><span class="tag proj">英语学习</span></div></div>
+          <div class="todo-item"><div class="chk"></div><div class="todo-title">整理 AI 工作台需求文档</div><div class="todo-meta"><span class="due">明天</span><span class="tag high">高</span><span class="tag proj">个人工作台</span></div></div>
+          <div class="todo-item"><div class="chk"></div><div class="todo-title">收集博客改版配色方案</div><div class="todo-meta"><span class="due">周五</span><span class="tag low">低</span><span class="tag proj">博客改版</span></div></div>
+          <div class="todo-item"><div class="chk"></div><div class="todo-title">给知识库写分类规则</div><div class="todo-meta"><span class="due overdue">已逾期 1 天</span><span class="tag high">高</span><span class="tag proj">知识库</span></div></div>
+          <div class="todo-item"><div class="chk"></div><div class="todo-title">给爸妈打电话</div><div class="todo-meta"><span class="due">本周</span><span class="tag low">低</span></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h">✅ 已完成</div>
+          <div class="todo-item"><div class="chk done">✓</div><div class="todo-title done">复盘昨天项目进展会</div><div class="todo-meta"><span class="tag low">已完成</span></div></div>
+          <div class="todo-item"><div class="chk done">✓</div><div class="todo-title done">早上背 30 个单词</div><div class="todo-meta"><span class="tag low">已完成</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 想法与需求 ===== -->
+    <div class="page hidden" id="page-ideas">
+      <div class="page-head">
+        <div><h1>想法与需求收集</h1><div class="sub">随手记录 · 标记类型与标签 · 可转成待办或项目</div></div>
+        <button class="btn-primary">＋ 记一条</button>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-h">💡 全部记录</div>
+          <div class="idea-card">
+            <div class="idea-top"><b>语音输入待办</b><span class="tag type-idea">想法</span></div>
+            <div class="idea-text">在外面走路时想到事情，希望语音说一句话就能自动变成一条待办。</div>
+            <div class="idea-foot"><span class="tag taggray">效率</span><span class="tag taggray">工作台</span><span class="time">今天 10:24</span></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-top"><b>工作台支持周报自动汇总</b><span class="tag type-req">需求</span></div>
+            <div class="idea-text">每周五自动汇总本周完成的待办 + 各项目进展，生成一份周报初稿。</div>
+            <div class="idea-foot"><span class="tag taggray">工作台</span><span class="time">昨天 21:03</span></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-top"><b>用 AI 批改英语作文</b><span class="tag type-idea">想法</span></div>
+            <div class="idea-text">把每周写的英语日记交给 AI 批改，标出语法错误并给出更地道的表达。</div>
+            <div class="idea-foot"><span class="tag taggray">英语学习</span><span class="time">03-11</span></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-top"><b>博客增加订阅功能</b><span class="tag type-req">需求</span></div>
+            <div class="idea-text">支持 RSS 和邮件订阅，有新文章时自动推送。</div>
+            <div class="idea-foot"><span class="tag taggray">博客</span><span class="time">03-09</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">🔄 可以转化</div>
+          <div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:13px;color:var(--text2)">想法池里比较成熟、可以落地成行动的：</div>
+            <div class="card" style="box-shadow:none;padding:12px 14px">
+              <b style="font-size:13px">📌 语音输入待办</b>
+              <div style="color:var(--text2);font-size:12px;margin:4px 0 8px">建议先转成「个人工作台」项目的一条待办</div>
+              <div style="display:flex;gap:8px"><button class="btn-primary" style="height:28px;font-size:12px">转为待办</button><button class="btn-ghost" style="height:28px;font-size:12px">转为项目</button></div>
+            </div>
+            <div class="card" style="box-shadow:none;padding:12px 14px">
+              <b style="font-size:13px">📌 博客增加订阅功能</b>
+              <div style="color:var(--text2);font-size:12px;margin:4px 0 8px">功能比较独立，适合单独立项</div>
+              <div style="display:flex;gap:8px"><button class="btn-primary" style="height:28px;font-size:12px">转为项目</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 项目进展 ===== -->
+    <div class="page" id="page-projects">
+      <div class="page-head">
+        <div><h1>项目进展</h1><div class="sub">在做的项目 · 资料 · 进展时间线 · 下一步</div></div>
+        <button class="btn-primary">＋ 新建项目</button>
+      </div>
+      <div class="grid grid-3">
+        <div class="card proj-card">
+          <div class="proj-top"><span class="proj-dot" style="background:var(--primary)"></span><b>个人工作台</b><span class="pct">35%</span></div>
+          <div class="bar"><i style="width:35%"></i></div>
+          <div class="proj-sub"><span>下一步：<b>完成待办模块</b></span><span>资料 6 · 记录 4</span></div>
+        </div>
+        <div class="card proj-card">
+          <div class="proj-top"><span class="proj-dot" style="background:var(--green)"></span><b>英语学习计划</b><span class="pct">60%</span></div>
+          <div class="bar"><i style="width:60%;background:linear-gradient(90deg,#10b981,#34d399)"></i></div>
+          <div class="proj-sub"><span>下一步：<b>Unit 5 听力</b></span><span>资料 8 · 记录 6</span></div>
+        </div>
+        <div class="card proj-card">
+          <div class="proj-top"><span class="proj-dot" style="background:var(--amber)"></span><b>博客改版</b><span class="pct">15%</span></div>
+          <div class="bar"><i style="width:15%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></i></div>
+          <div class="proj-sub"><span>下一步：<b>定配色方案</b></span><span>资料 3 · 记录 1</span></div>
+        </div>
+      </div>
+      <div class="section-title">当前项目：个人工作台</div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="card-h">📈 进展时间线 <span class="more">＋ 记一条进展</span></div>
+          <div class="card-b timeline">
+            <div class="tl-item"><div class="t">确定五大模块划分</div><div class="d">待办事项 / 想法与需求 / 项目进展 / 英语学习 / 知识库，顶部功能栏与左侧模块呼应。</div><div class="time">今天 09:40</div></div>
+            <div class="tl-item"><div class="t">完成整体布局设计稿</div><div class="d">顶部一行主要功能，左侧按工作模块区分，右侧主区域随模块切换。</div><div class="time">昨天 20:15</div></div>
+            <div class="tl-item"><div class="t">明确项目范围</div><div class="d">个人使用为主，先做核心三模块（待办 / 想法 / 项目），英语与知识库迭代完善。</div><div class="time">03-12</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h">📎 相关资料 <span class="more">＋ 添加资料</span></div>
+          <div class="res-item"><div class="res-ic" style="background:#e0e7ff">🔗</div><div class="name">Worktile / Notion 工作台案例收集</div><span class="kind">链接</span></div>
+          <div class="res-item"><div class="res-ic" style="background:#fee2e2">📄</div><div class="name">AI 工作台需求文档（草稿）.md</div><span class="kind">文档</span></div>
+          <div class="res-item"><div class="res-ic" style="background:#fef3c7">🖼️</div><div class="name">界面设计稿 demo.png</div><span class="kind">图片</span></div>
+          <div class="res-item"><div class="res-ic" style="background:#dcfce7">📝</div><div class="name">模块划分讨论记录</div><span class="kind">笔记</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 英语学习 ===== -->
+    <div class="page hidden" id="page-english">
+      <div class="page-head">
+        <div><h1>英语学习</h1><div class="sub">学习项（书籍 / 网站 / 项目 / 课程）→ 每项下面的细化学习活动</div></div>
+        <button class="btn-primary">＋ 添加学习项 ▾</button>
+      </div>
+
+      <div class="eng-stats">
+        <div class="eng-stat">🔥 <b>12 天</b><span>连续打卡</span></div>
+        <div class="eng-stat">📅 <b>26 次</b><span>本月打卡</span></div>
+        <div class="eng-stat">📚 <b>4 个</b><span>进行中学习项</span></div>
+        <div class="eng-stat">⏱️ <b>36.5 h</b><span>累计学习时长</span></div>
+      </div>
+
+      <div class="learn-layout">
+        <!-- 左列：学习项列表 -->
+        <div class="card">
+          <div class="card-h">📚 我的学习项 <span class="more">＋ 添加</span></div>
+          <div class="li-card sel" data-ld="ld-1">
+            <div class="li-top"><div class="li-ic" style="background:#ede9fe">📕</div><b>《英语语法新思维》</b><span class="itype book">书籍</span></div>
+            <div class="li-bar"><i style="width:45%"></i></div>
+            <div class="li-sub"><span>5/12 章 · 活动 3</span><span>45%</span></div>
+          </div>
+          <div class="li-card" data-ld="ld-2">
+            <div class="li-top"><div class="li-ic" style="background:#dbeafe">🌐</div><b>ESL Pod 每日听力</b><span class="itype site">网站</span></div>
+            <div class="li-bar"><i style="width:30%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></i></div>
+            <div class="li-sub"><span>120/400 集 · 活动 3</span><span>30%</span></div>
+          </div>
+          <div class="li-card" data-ld="ld-3">
+            <div class="li-top"><div class="li-ic" style="background:#fef3c7">🎤</div><b>口语陪练计划</b><span class="itype proj">项目</span></div>
+            <div class="li-bar"><i style="width:20%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></i></div>
+            <div class="li-sub"><span>目标 20 周 · 活动 3</span><span>20%</span></div>
+          </div>
+          <div class="li-card" data-ld="ld-4">
+            <div class="li-top"><div class="li-ic" style="background:#dcfce7">📗</div><b>Atomic Habits 英文原版</b><span class="itype book">书籍</span></div>
+            <div class="li-bar"><i style="width:15%;background:linear-gradient(90deg,#10b981,#34d399)"></i></div>
+            <div class="li-sub"><span>40/280 页 · 活动 2</span><span>15%</span></div>
+          </div>
+          <div class="card-b" style="border-top:1px solid var(--border)">
+            <div style="display:flex;gap:8px"><input placeholder="＋ 输入名称，选类型添加" style="flex:1;height:30px;border:1px solid var(--border);border-radius:8px;padding:0 10px;font-size:12px;outline:none"><button class="btn-mini">添加</button></div>
+          </div>
+        </div>
+
+        <!-- 右列：选中学习项的详情 -->
+        <div>
+          <!-- 学习项 1：书籍 -->
+          <div class="li-detail" id="ld-1">
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">📕 《英语语法新思维》 <span class="itype book">书籍</span><span class="more">⚙️ 编辑 · 🗑️</span></div>
+              <div class="card-b">
+                <div class="proj-top"><b>整体进度</b><span class="pct">45%</span></div>
+                <div class="bar"><i style="width:45%"></i></div>
+                <div class="proj-sub"><span>已读 5 / 12 章</span><span>累计学习 8.5h</span><span>上次学习：昨天</span></div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🎯 学习活动（3）<span class="more">＋ 添加活动</span></div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">精读下一章 <span class="freq chapter">章节推进</span></div>
+                  <div class="act-desc">逐句精读，标记长难句</div>
+                  <div class="act-meta"><div class="mini-bar"><i style="width:45%"></i></div><span style="font-size:12px;color:var(--text2)">第 6 / 12 章</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">章末练习题 <span class="freq each">每章一次</span></div>
+                  <div class="act-desc">每读完一章完成配套练习</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--text2)">已完成 5 章 · 正确率 82%</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">错题周末复盘 <span class="freq weekly">每周</span></div>
+                  <div class="act-desc">汇总本周练习错题，重做一遍</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--amber)">本周待完成</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h">🧾 学习记录</div>
+              <div class="card-b timeline">
+                <div class="tl-item"><div class="t">读完第 5 章 + 章末练习</div><div class="d">正确率 85%，错题 3 道已标记</div><div class="time">昨天 · 40 分钟</div></div>
+                <div class="tl-item"><div class="t">第 4 章长难句精读</div><div class="d">整理 6 个句型到笔记</div><div class="time">03-10 · 35 分钟</div></div>
+                <div class="tl-item"><div class="t">第 1-3 章错题复盘</div><div class="d">重做 12 道错题，全部通过</div><div class="time">03-06 · 25 分钟</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 学习项 2：网站 -->
+          <div class="li-detail hidden" id="ld-2">
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🌐 ESL Pod 每日听力 <span class="itype site">网站</span><span class="more">⚙️ 编辑 · 🗑️</span></div>
+              <div class="card-b">
+                <div class="proj-top"><b>整体进度</b><span class="pct">30%</span></div>
+                <div class="bar"><i style="width:30%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></i></div>
+                <div class="proj-sub"><span>已听 120 / 400 集</span><span>累计 14h</span><span>生词本 286 个</span></div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🎯 学习活动（3）<span class="more">＋ 添加活动</span></div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">每日精听 1 集 <span class="freq daily">每日</span></div>
+                  <div class="act-desc">听 3 遍：盲听 → 看稿听 → 跟读</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--amber)">今日待完成</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">生词加入词本 <span class="freq each">每次</span></div>
+                  <div class="act-desc">精听中遇到的生词录入生词本</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--text2)">累计 286 个 · 已掌握 190</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">周末跟读复述 <span class="freq weekly">每周</span></div>
+                  <div class="act-desc">选本周 1 集做影子跟读并复述</div>
+                  <div class="act-meta"><span class="act-done">本周已完成 ✓</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h">🧾 学习记录</div>
+              <div class="card-b timeline">
+                <div class="tl-item"><div class="t">第 120 集 · At the Coffee Shop</div><div class="d">生词 4 个：latte art, drip coffee…</div><div class="time">昨天 · 20 分钟</div></div>
+                <div class="tl-item"><div class="t">第 119 集 · Booking a Hotel</div><div class="d">生词 6 个，已加入复习队列</div><div class="time">03-12 · 22 分钟</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 学习项 3：项目 -->
+          <div class="li-detail hidden" id="ld-3">
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🎤 口语陪练计划 <span class="itype proj">项目</span><span class="more">⚙️ 编辑 · 🗑️</span></div>
+              <div class="card-b">
+                <div class="proj-top"><b>整体进度</b><span class="pct">20%</span></div>
+                <div class="bar"><i style="width:20%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></i></div>
+                <div class="proj-sub"><span>第 4 / 20 周</span><span>对话练习 9 次</span><span>录音复盘 9 次</span></div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🎯 学习活动（3）<span class="more">＋ 添加活动</span></div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">每周 2 次对话练习 <span class="freq weekly">每周</span></div>
+                  <div class="act-desc">与语伴 / AI 陪练进行 15 分钟主题对话</div>
+                  <div class="act-meta"><div class="mini-bar"><i style="width:50%;background:#f59e0b"></i></div><span style="font-size:12px;color:var(--text2)">本周 1 / 2</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">录音复盘 <span class="freq each">每次</span></div>
+                  <div class="act-desc">对话后听录音，记录卡壳表达</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--text2)">累计 9 次</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">影子跟读 TED <span class="freq daily">每日</span></div>
+                  <div class="act-desc">每天 5 分钟跟读，练语音语调</div>
+                  <div class="act-meta"><span class="act-done">今日已完成 ✓</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h">🧾 学习记录</div>
+              <div class="card-b timeline">
+                <div class="tl-item"><div class="t">第 4 次对话 · 主题：My Hometown</div><div class="d">卡壳点：介绍地域文化时词汇不足，整理 8 个表达</div><div class="time">03-12 · 15 分钟</div></div>
+                <div class="tl-item"><div class="t">第 3 次对话 · 主题：Weekend Plan</div><div class="d">流利度提升， fewer 长停顿</div><div class="time">03-09 · 15 分钟</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 学习项 4：书籍 -->
+          <div class="li-detail hidden" id="ld-4">
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">📗 Atomic Habits 英文原版 <span class="itype book">书籍</span><span class="more">⚙️ 编辑 · 🗑️</span></div>
+              <div class="card-b">
+                <div class="proj-top"><b>整体进度</b><span class="pct">15%</span></div>
+                <div class="bar"><i style="width:15%;background:linear-gradient(90deg,#10b981,#34d399)"></i></div>
+                <div class="proj-sub"><span>已读 40 / 280 页</span><span>累计 3h</span><span>摘抄 42 条</span></div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-h">🎯 学习活动（2）<span class="more">＋ 添加活动</span></div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">每晚读 15 页 <span class="freq daily">每日</span></div>
+                  <div class="act-desc">睡前阅读，不查词典先猜词义</div>
+                  <div class="act-meta"><span class="act-done">今日已完成 ✓</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+              <div class="act-item">
+                <div class="act-main">
+                  <div class="act-name">好句摘抄 <span class="freq each">每次</span></div>
+                  <div class="act-desc">遇到地道表达记入摘抄本</div>
+                  <div class="act-meta"><span style="font-size:12px;color:var(--text2)">累计 42 条</span></div>
+                </div>
+                <button class="btn-mini">记一次</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h">🧾 学习记录</div>
+              <div class="card-b timeline">
+                <div class="tl-item"><div class="t">读到 P40 · Chapter 3</div><div class="d">摘抄：make it obvious, cue craving response…</div><div class="time">昨天 · 25 分钟</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        var page = document.getElementById('page-english');
+        page.addEventListener('click', function(e){
+          var card = e.target.closest('.li-card');
+          if(!card) return;
+          page.querySelectorAll('.li-card').forEach(function(c){ c.classList.remove('sel'); });
+          card.classList.add('sel');
+          page.querySelectorAll('.li-detail').forEach(function(d){ d.classList.add('hidden'); });
+          var d = document.getElementById(card.dataset.ld);
+          if(d) d.classList.remove('hidden');
+        });
+      })();
+    </script>
+
+    <!-- ===== 知识库 ===== -->
+    <div class="page hidden" id="page-kb">
+      <div class="page-head">
+        <div><h1>知识库</h1><div class="sub">网站资料 · 书籍 · 其他资源 · 分类展示</div></div>
+        <button class="btn-primary">＋ 收藏资料</button>
+      </div>
+      <div class="section-title">🌐 网站资料</div>
+      <div class="kb-grid">
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#e0e7ff">🔗</div><b>MDN Web 文档</b></div><p>前端开发权威参考，日常查 API 用。</p><div class="kc-foot"><span class="tag taggray">开发</span><span class="tag taggray">常用</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#fef3c7">🔗</div><b>Design Systems Gallery</b></div><p>优秀设计系统案例合集，做界面参考。</p><div class="kc-foot"><span class="tag taggray">设计</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#dcfce7">🔗</div><b>Excalidraw</b></div><p>手绘风白板，画流程图和架构草图。</p><div class="kc-foot"><span class="tag taggray">工具</span><span class="tag taggray">常用</span></div></div>
+      </div>
+      <div class="section-title">📖 书籍</div>
+      <div class="kb-grid">
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#fee2e2">📕</div><b>《原子习惯》</b></div><p>已读。微习惯叠加策略，对做打卡功能有启发。</p><div class="kc-foot"><span class="tag taggray">方法论</span><span class="tag low">已读完</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#ede9fe">📗</div><b>《Getting Things Done》</b></div><p>在读 40%。GTD 收集-整理-执行流程，是想法池模块的参考。</p><div class="kc-foot"><span class="tag taggray">效率</span><span class="tag mid">在读</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#cffafe">📘</div><b>《英语语法新思维》</b></div><p>计划读。配合英语学习模块使用。</p><div class="kc-foot"><span class="tag taggray">英语</span><span class="tag taggray">计划中</span></div></div>
+      </div>
+      <div class="section-title">📦 其他资源</div>
+      <div class="kb-grid">
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#f3f4f6">🎬</div><b>英语播客清单</b></div><p>通勤听力素材 6 个，每周轮换。</p><div class="kc-foot"><span class="tag taggray">英语</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#f3f4f6">🗂️</div><b>博客素材库</b></div><p>写作灵感、截图素材、参考文章。</p><div class="kc-foot"><span class="tag taggray">博客</span></div></div>
+        <div class="card kb-card"><div class="kc-top"><div class="kc-ic" style="background:#f3f4f6">🧰</div><b>常用命令片段</b></div><p>Git、Docker、部署脚本常用命令。</p><div class="kc-foot"><span class="tag taggray">开发</span><span class="tag taggray">常用</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="demo-note">
+  💡 <b>交互 Demo（静态示例数据）</b><br>
+  点击左侧模块可切换页面 · 确认效果后正式开发
+</div>
+
+<script>
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click', function(){
+      document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('active'); });
+      item.classList.add('active');
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.add('hidden'); });
+      document.getElementById('page-' + item.dataset.page).classList.remove('hidden');
+      window.scrollTo(0,0);
+    });
+  });
+</script>
+</body>
+</html>

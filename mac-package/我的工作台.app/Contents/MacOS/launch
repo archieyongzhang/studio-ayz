@@ -1,0 +1,15 @@
+#!/bin/bash
+# 「我的工作台」桌面图标入口: 读配置 → 调用包内的启动脚本(自动启服务 + 开浏览器)
+CONFIG="$HOME/Library/Application Support/MyWorkbench/config.sh"
+
+if [ -f "$CONFIG" ]; then
+  # shellcheck disable=SC1090
+  source "$CONFIG"
+fi
+
+if [ -n "$PKG_DIR" ] && [ -f "$PKG_DIR/lib/open-workbench.sh" ]; then
+  exec /bin/bash "$PKG_DIR/lib/open-workbench.sh"
+fi
+
+osascript -e 'display alert "还没安装" message "请先双击安装包里的「安装我的工作台.command」完成安装。" as critical' >/dev/null 2>&1
+exit 1
